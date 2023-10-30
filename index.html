@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ping Pong Oyunu</title>
+    <style>
+        canvas {
+            background: black;
+            display: block;
+            margin: auto;
+        }
+    </style>
+</head>
+<body>
+
+<canvas id="pong" width="800" height="400"></canvas>
+
+<script>
+    const canvas = document.getElementById("pong");
+    const ctx = canvas.getContext("2d");
+
+    const ball = {
+        x: canvas.width / 2,
+        y: canvas.height / 2,
+        radius: 10,
+        speed: 4,
+        dx: 4,
+        dy: 4,
+    };
+
+    const player = {
+        x: 0,
+        y: canvas.height / 2 - 40,
+        width: 10,
+        height: 80,
+        dy: 4,
+    };
+
+    const opponent = {
+        x: canvas.width - 10,
+        y: canvas.height / 2 - 40,
+        width: 10,
+        height: 80,
+        dy: 4,
+    };
+
+    function movePaddle(paddle, dy) {
+        paddle.y += dy;
+        if (paddle.y < 0) paddle.y = 0;
+        if (paddle.y + paddle.height > canvas.height) paddle.y = canvas.height - paddle.height;
+    }
+
+    function draw() {
+        ctx.fillStyle = "#000";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Topu çiz
+        ctx.fillStyle = "white";
+        ctx.beginPath();
+        ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2, false);
+        ctx.closePath();
+        ctx.fill();
+
+        // Oyuncu ve rakip için dikdörtgen çiz
+        ctx.fillRect(player.x, player.y, player.width, player.height);
+        ctx.fillRect(opponent.x, opponent.y, opponent.width, opponent.height);
+    }
+
+    function update() {
+        ball.x += ball.dx;
+        ball.y += ball.dy;
+
+        // Topun yukarı veya aşağı sınırlara çarpma kontrolü
+        if (ball.y + ball.radius > canvas.height || ball.y - ball.radius < 0) {
+            ball.dy = -ball.dy;
+        }
+
+        // Topun oyuncu veya rakiple temas kontrolü
+        if ((ball.dx > 0 && ball.x + ball.radius > opponent.x && ball.y + ball.radius > opponent.y && ball.y - ball.radius < opponent.y + opponent.height) ||
+            (ball.dx < 0 && ball.x - ball.radius < player.x + player.width && ball.y + ball.radius > player.y && ball.y - ball.radius < player.y + player.height)) {
+            ball.dx = -ball.dx;
+        }
+
+        // Topun sol veya sağ sınırlara çarpma kontrolü
+        if (ball.x + ball.radius > canvas.width || ball.x - ball.radius < 0) {
+            // Oyunu başlat
+            ball.x = canvas.width / 2;
+            ball.y = canvas.height / 2;
+            ball.dx = -ball.dx;
+        }
+        
+        draw();
+    }
+
+    document.addEventListener("keydown", function (event) {
+        switch (event.keyCode) {
+            case 38: // Yukarı ok tuşu
+                movePaddle(opponent, -opponent.dy);
+                break;
+            case 40: // Aşağı ok tuşu
+                movePaddle(opponent, opponent.dy);
+                break;
+            case 87: // 'W' tuşu
+                movePaddle(player, -player.dy);
+                break;
+            case 83: // 'S' tuşu
+                movePaddle(player, player.dy);
+                break;
+        }
+    });
+
+    setInterval(update, 1000 / 60); // 60 FPS'de güncelleme
+
+</script>
+
+</body>
+</html>
